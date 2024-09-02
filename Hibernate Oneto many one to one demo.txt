@@ -1,0 +1,167 @@
+<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+package com.pack.mngodb.controller;
+
+import com.pack.mngodb.model.User;
+import com.pack.mngodb.repository.shoopingRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/shopping-Service")
+public class ShopController {
+    @Autowired
+    private shoopingRepo shoppingRepo;
+
+    public ShopController(shoopingRepo shoppingRepo) {
+        this.shoppingRepo = shoppingRepo;
+    }
+
+    @PostMapping("/orderPlace")
+    private String placeOrder(@RequestBody User user) {
+        shoppingRepo.save(user);
+        return "Order placed successfully";
+
+    }
+    //also we can write above method as
+    /*
+    @PostMapping
+    public ResponseEntity <User> saveOrUpdate(@RequestBody User user)
+    return new ResponseEntity<User> (shoopingRepo.saveOrUpdate(user),HTTPStatus.ACCEPTED;
+
+     }*/
+
+    @GetMapping("/getUsersByName/{name}")
+    public List<User> getUserByName(@PathVariable String name) {
+        return shoppingRepo.findByName(name);
+    }
+
+    @GetMapping("/getUsersByAddress/{city}")
+    public List<User> getUserByAddress(@PathVariable String city) {
+        return shoppingRepo.findByCity(city);
+    }
+}
+
+package com.pack.mngodb.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Data
+@AllArgsConstructor
+public class Address {
+    private String city;
+    private  String state;
+    private String pincode;
+
+}
+
+package com.pack.mngodb.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Data
+@AllArgsConstructor
+public class Product {
+    private String prname;
+    private int qty;
+    private int price;
+}
+
+package com.pack.mngodb.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
+
+@Data
+@Document(collection ="order_db" )
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
+
+    @Id
+    private int Id;
+    private String name;
+    private String gender;
+    private List<Product> productList;
+    private Address address;
+}
+
+package com.pack.mngodb.repository;
+
+import com.pack.mngodb.model.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+
+import java.util.List;
+
+public interface shoopingRepo extends MongoRepository<User,Integer> {
+
+    List<User> findByName(String name);
+
+    @Query("{'Address.city':?0}")
+    List<User> findByCity(String city);
+}
+
+
+package com.pack.mngodb;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class HbMongoMappingdemoApplication {
+
+	public static void main(String[] args) {
+
+		SpringApplication.run(HbMongoMappingdemoApplication.class, args);
+	}
+
+}
+
+
+spring.application.name=hb-mongo-mappingdemo
+spring.data.mongodb.host=localhost
+spring.data.mongodb.port=27017
+spring.data.mongodb.database=shoppingdata
+server.port=8084
+
