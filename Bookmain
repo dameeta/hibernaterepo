@@ -1,0 +1,56 @@
+package com.net;
+
+import java.util.List;
+
+import org.hibernate.Session;
+
+import com.net.entity.Book;
+import com.net.util.Hbutil;
+
+import jakarta.transaction.SystemException;
+import jakarta.transaction.Transaction;
+
+public class MainApp {public static void main(String[] args) {
+
+
+	Book book = new Book("Core Java", "Learn Core Java with Coding Examples");
+	Book book1 = new Book("Learn Hibernate", "Learn Hibernate with building projects");
+	Transaction transaction = null;
+	try (Session session = Hbutil.getSessionFactory().openSession()) {
+		// start a transaction
+		transaction = (Transaction) session.beginTransaction();
+		// save the book objects
+		session.persist(book);
+		session.persist(book1);
+		// commit transaction
+		transaction.commit();
+	} catch (Exception e) {
+		/*if (transaction != null) {
+			try {
+				transaction.rollback();
+			} catch (IllegalStateException | SystemException e1) {
+				// TODO Auto-generated catch block
+		*/		e1.printStackTrace();
+			}
+		}
+		e.printStackTrace();
+	}
+
+
+	try (Session session = Hbutil.getSessionFactory().openSession()) {
+		List<Book> books = session.createQuery("from Book", Book.class).list();
+		books.forEach(b -> {
+			System.out.println("Print book name : " + b.getName());
+		});
+	} catch (Exception e) {
+		/*if (transaction != null) {
+			try {
+				transaction.rollback();
+			} catch (IllegalStateException | SystemException e1) {
+				// TODO Auto-generated catch block
+*/				//e1.printStackTrace();
+			
+		
+	}
+}
+}
