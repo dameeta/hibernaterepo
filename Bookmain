@@ -5,53 +5,36 @@ import java.util.List;
 import org.firsthb.hello.entity.Book;
 import org.firsthb.hello.util.BookUtil;
 import org.hibernate.Session;
-
-import jakarta.transaction.SystemException;
-import jakarta.transaction.Transaction;
+import org.hibernate.Transaction;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        Book book = new Book("Core Java", "Learn Core Java with Coding Examples");
+        Book book1 = new Book("Learn Hibernate", "Learn Hibernate with building projects");
 
-    Book book = new Book("Core Java", "Learn Core Java with Coding Examples");
-    Book book1 = new Book("Learn Hibernate", "Learn Hibernate with building projects");
-    Transaction transaction = null;
-    try (Session session = BookUtil.getSessionFactory().openSession()) {
-        // start a transaction
-        transaction = (Transaction) session.beginTransaction();
-        // save the book objects
-        session.persist(book);
-        session.persist(book1);
-        // commit transaction
-        transaction.commit();
-    } catch (Exception e) {
-		if (transaction != null) {
-			try {
-				transaction.rollback();
-			} catch (IllegalStateException | SystemException e1) {
-				// TODO Auto-generated catch block
-			e.printStackTrace();
+        // Save book objects
+        try (Session session = BookUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+            try {
+                session.persist(book);
+                session.persist(book1);
+                transaction.commit();
+            } catch (Exception e) {
+                if (transaction != null) transaction.rollback();
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Retrieve and display book objects
+        try (Session session = BookUtil.getSessionFactory().openSession()) {
+            List<Book> books = session.createQuery("from Book", Book.class).list();
+            books.forEach(b -> System.out.println("Print book name : " + b.getName()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
-		e.printStackTrace();
-}
-
-
-	try (Session session = BookUtil.getSessionFactory().openSession()) {
-List<Book> books = session.createQuery("from Book", Book.class).list();
-		books.forEach(b -> {
-        System.out.println("Print book name : " + b.getName());
-        });
-        } catch (Exception e) {
-        if (transaction != null) {
-            try {
-                transaction.rollback();
-            } catch (IllegalStateException | SystemException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-
-
-            }
-        }
-    }}}
